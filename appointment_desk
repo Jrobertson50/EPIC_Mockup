@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<!--
+  Appointment Desk Mockup
+  Version: 1.1  |  Date: 2026-11-06  |  Change: EHR-style blue palette, call pop removed  |  Author: UCC (demo asset)
+  Purpose: Static demo of a generic EHR appointment desk page.
+  All names, numbers, and records are fictitious. Not affiliated with any EHR vendor.
+  No external dependencies; safe for GitHub Pages.
+-->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Appointment Desk (Demo) | Fictitious data</title>
+<style>
+  :root{
+    --bg:#e4ebf3; --surface:#ffffff; --surface-2:#eef3f8; --line:#b9c8d8;
+    --ink:#1a2a3a; --ink-2:#4a5d70; --brand:#1d3f66; --brand-ink:#ffffff;
+    --accent:#2b6cb0; --warn:#a45a00; --warn-bg:#fff4dc; --alert:#b3261e; --alert-bg:#fde8e6;
+    --pop:#1d3f66; --pop-ink:#eaf2fb; --focus:#2b6cb0; --row-hover:#eaf1f9; --sel:#fff7c2;
+    --head:#d6e3f1; --head-ink:#1d3f66;
+    color-scheme:light;
+  }
+  @media (prefers-color-scheme: dark){
+    :root{
+      --bg:#111b26; --surface:#18242f; --surface-2:#1e2c3a; --line:#34485c;
+      --ink:#e2eaf2; --ink-2:#9fb2c4; --brand:#163250; --brand-ink:#ffffff;
+      --accent:#5a9ee0; --warn:#e6a35c; --warn-bg:#3a2b1c; --alert:#f08a82; --alert-bg:#3d2226;
+      --pop:#163250; --pop-ink:#e3edf7; --focus:#5a9ee0; --row-hover:#22344a; --sel:#3a3720;
+      --head:#22374e; --head-ink:#cfe0f2;
+      color-scheme:dark;
+    }
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0}
+  body{background:var(--bg);color:var(--ink);
+    font:14px/1.45 "Segoe UI",system-ui,-apple-system,Roboto,"Helvetica Neue",Arial,sans-serif}
+  button{font:inherit;color:inherit;cursor:pointer}
+  :focus-visible{outline:2px solid var(--focus);outline-offset:2px}
+
+  /* Demo banner */
+  .demo{background:var(--warn-bg);color:var(--warn);text-align:center;font-size:12.5px;
+    padding:4px 8px;border-bottom:1px solid var(--line)}
+
+  /* App bar */
+  .appbar{display:flex;align-items:center;gap:16px;background:var(--brand);color:var(--brand-ink);
+    padding:6px 14px;min-height:40px}
+  .logo{display:flex;align-items:center;gap:8px;font-weight:600;letter-spacing:.2px}
+  .logo svg{width:20px;height:20px}
+  .appbar .menu{display:flex;gap:2px;flex-wrap:wrap}
+  .appbar .menu button{background:none;border:0;color:var(--brand-ink);opacity:.85;padding:6px 10px;border-radius:4px}
+  .appbar .menu button:hover{background:rgba(255,255,255,.12);opacity:1}
+  .appbar .who{margin-left:auto;font-size:12.5px;opacity:.9;text-align:right}
+
+  .btn{border:1px solid var(--line);background:var(--surface);padding:6px 12px;border-radius:4px}
+  .btn:hover{background:var(--surface-2)}
+  .btn.primary{background:var(--accent);border-color:var(--accent);color:#fff}
+  .btn.primary:hover{filter:brightness(1.07)}
+
+  /* Patient header */
+  .pt{display:flex;flex-wrap:wrap;gap:14px 28px;align-items:center;background:var(--head);
+    border-bottom:1px solid var(--line);padding:12px 16px}
+  .pt .id{display:flex;gap:12px;align-items:center}
+  .avatar{width:48px;height:48px;border-radius:50%;background:var(--brand);color:var(--brand-ink);
+    display:grid;place-items:center;font-weight:600;font-size:17px}
+  .pt h1{margin:0;font-size:20px;font-weight:600}
+  .pt .sub{color:var(--ink-2);font-size:13px}
+  .facts{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,auto));gap:2px 24px;font-size:13px}
+  .facts span{color:var(--ink-2);display:block;font-size:12px}
+  .flags{display:flex;gap:6px;flex-wrap:wrap;margin-left:auto}
+  .flag{font-size:12px;padding:3px 8px;border-radius:3px;border:1px solid}
+  .flag.alert{color:var(--alert);background:var(--alert-bg);border-color:var(--alert)}
+  .flag.warn{color:var(--warn);background:var(--warn-bg);border-color:var(--warn)}
+  .flag.ok{color:var(--accent);border-color:var(--accent)}
+
+  /* Workspace */
+  .work{display:grid;grid-template-columns:190px 1fr 320px;gap:0;min-height:calc(100vh - 210px)}
+  nav.side{background:var(--surface-2);border-right:1px solid var(--line);padding:10px 0}
+  nav.side button{display:block;width:100%;text-align:left;background:none;border:0;padding:8px 16px;
+    border-left:3px solid transparent;color:var(--ink-2)}
+  nav.side button:hover{background:var(--row-hover);color:var(--ink)}
+  nav.side button[aria-current="page"]{border-left-color:var(--accent);background:var(--head);color:var(--ink);font-weight:600}
+  nav.side hr{border:0;border-top:1px solid var(--line);margin:8px 12px}
+
+  main{padding:14px 18px;min-width:0}
+  .titlebar{display:flex;align-items:baseline;gap:12px;flex-wrap:wrap;margin-bottom:10px}
+  .titlebar h2{margin:0;font-size:18px;font-weight:600}
+  .titlebar .meta{color:var(--ink-2);font-size:13px}
+  .toolbar{display:flex;gap:6px;flex-wrap:wrap;padding:8px;background:var(--surface);border:1px solid var(--line);
+    border-radius:4px 4px 0 0;border-bottom:0}
+  .toolbar .sep{width:1px;background:var(--line);margin:2px 4px}
+  .tabs{display:flex;gap:0;background:var(--surface-2);border:1px solid var(--line);border-bottom:0}
+  .tabs button{background:none;border:0;padding:8px 14px;color:var(--ink-2);border-bottom:2px solid transparent}
+  .tabs button[aria-selected="true"]{color:var(--ink);border-bottom-color:var(--brand);background:var(--surface);font-weight:600}
+  .panel{background:var(--surface);border:1px solid var(--line);border-radius:0 0 4px 4px;overflow-x:auto}
+  table{width:100%;border-collapse:collapse;font-size:13px}
+  th,td{text-align:left;padding:8px 10px;border-bottom:1px solid var(--line);white-space:nowrap}
+  th{background:var(--head);color:var(--head-ink);font-weight:600;font-size:12.5px;position:sticky;top:0}
+  tbody tr{cursor:pointer}
+  tbody tr:hover{background:var(--row-hover)}
+  tbody tr.selected{background:var(--sel)}
+  .status{font-size:12px;padding:2px 7px;border-radius:10px;border:1px solid}
+  .s-conf{color:var(--accent);border-color:var(--accent)}
+  .s-unc{color:var(--warn);border-color:var(--warn)}
+  .s-done{color:var(--ink-2);border-color:var(--line)}
+  .s-ns{color:var(--alert);border-color:var(--alert)}
+  .note{font-size:12.5px;color:var(--ink-2);padding:8px 10px}
+
+  /* Right rail */
+  aside{border-left:1px solid var(--line);background:var(--surface-2);padding:14px;display:flex;flex-direction:column;gap:12px}
+  .box{background:var(--surface);border:1px solid var(--line);border-radius:4px}
+  .box h3{margin:0;font-size:13.5px;font-weight:600;padding:8px 12px;border-bottom:1px solid var(--line);background:var(--head);color:var(--head-ink);
+    display:flex;justify-content:space-between;align-items:center}
+  .box h3 small{font-weight:400;color:var(--ink-2)}
+  .box{overflow:hidden}
+  .box .in{padding:10px 12px;font-size:13px}
+  .kv{display:grid;grid-template-columns:auto 1fr;gap:4px 12px}
+  .kv span{color:var(--ink-2)}
+  .bar{height:6px;background:var(--line);border-radius:3px;overflow:hidden;margin-top:3px}
+  .bar i{display:block;height:100%;background:var(--accent)}
+  .summary{margin:8px 0 0;padding:8px 10px;background:var(--surface-2);border-left:3px solid var(--accent);border-radius:2px}
+  ul.plain{margin:0;padding:0;list-style:none}
+  ul.plain li{display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px dashed var(--line)}
+  ul.plain li:last-child{border-bottom:0}
+  .due{color:var(--warn);font-weight:600}
+
+  footer{font-size:12px;color:var(--ink-2);text-align:center;padding:10px;border-top:1px solid var(--line);background:var(--surface)}
+
+  .toast{position:fixed;bottom:18px;left:50%;transform:translateX(-50%);background:var(--ink);color:var(--surface);
+    padding:9px 16px;border-radius:4px;font-size:13px;opacity:0;pointer-events:none;transition:opacity .2s}
+  .toast.show{opacity:1}
+
+  @media (max-width:1100px){.work{grid-template-columns:170px 1fr}aside{grid-column:1/-1;border-left:0;border-top:1px solid var(--line);
+    display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr))}}
+  @media (max-width:720px){.work{grid-template-columns:1fr}nav.side{display:flex;overflow-x:auto;padding:0;border-right:0;border-bottom:1px solid var(--line)}
+    nav.side button{white-space:nowrap;border-left:0;border-bottom:3px solid transparent;width:auto}
+    nav.side button[aria-current="page"]{border-bottom-color:var(--brand)}nav.side hr{display:none}
+    .appbar .who{display:none}}
+</style>
+</head>
+<body>
+
+<div class="demo" role="note">Demo environment. All patient, provider, and office data on this page is fictitious.</div>
+
+<header class="appbar">
+  <div class="logo">
+    <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10" fill="none" stroke="currentColor" stroke-width="2"/><path d="M7 12h3l1.5-3 3 6 1.5-3h1" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    Meridian Practice
+  </div>
+  <div class="menu" role="menubar">
+    <button role="menuitem" data-demo>Schedule</button>
+    <button role="menuitem" data-demo>Patient lookup</button>
+    <button role="menuitem" data-demo>Messages</button>
+    <button role="menuitem" data-demo>Reports</button>
+  </div>
+  <div class="who">Agent: Demo User 01<br>Workstation: SUPPORT-DEMO-07</div>
+</header>
+
+<section class="pt" aria-label="Patient header">
+  <div class="id">
+    <div class="avatar" aria-hidden="true">RS</div>
+    <div>
+      <h1>Riley Sample</h1>
+      <div class="sub">Female, 40 years. Born 04/12/1986. Patient ID DEMO-000417</div>
+    </div>
+  </div>
+  <div class="facts">
+    <div><span>Home office</span>Sample Dental, Northgate</div>
+    <div><span>Primary dentist</span>Dr. Lena Ortiz</div>
+    <div><span>Mobile</span>(555) 010-4471</div>
+    <div><span>Language</span>English</div>
+    <div><span>Contact preference</span>Text</div>
+  </div>
+  <div class="flags">
+    <span class="flag alert">Premed required</span>
+    <span class="flag warn">Balance $85.00</span>
+    <span class="flag ok">Insurance verified</span>
+  </div>
+</section>
+
+<div class="work">
+  <nav class="side" aria-label="Patient workspace">
+    <button aria-current="page">Appointment desk</button>
+    <button data-demo>Chart summary</button>
+    <button data-demo>Treatment plan</button>
+    <button data-demo>Insurance</button>
+    <button data-demo>Billing</button>
+    <hr>
+    <button data-demo>Communications</button>
+    <button data-demo>Documents</button>
+    <button data-demo>Demographics</button>
+  </nav>
+
+  <main>
+    <div class="titlebar">
+      <h2>Appointment desk</h2>
+      <span class="meta">Today is Friday, Nov 6, 2026</span>
+    </div>
+
+    <div class="toolbar" role="toolbar" aria-label="Appointment actions">
+      <button class="btn primary" data-demo="New appointment form opened">Schedule appointment</button>
+      <button class="btn" data-sel="Reschedule">Reschedule</button>
+      <button class="btn" data-sel="Cancel">Cancel appointment</button>
+      <span class="sep" aria-hidden="true"></span>
+      <button class="btn" data-sel="Confirm">Confirm</button>
+      <button class="btn" data-sel="Reminder sent for">Send reminder</button>
+      <button class="btn" data-demo>Add to wait list</button>
+    </div>
+
+    <div class="tabs" role="tablist">
+      <button role="tab" aria-selected="true" data-tab="upcoming">Upcoming (2)</button>
+      <button role="tab" aria-selected="false" data-tab="past">Past (5)</button>
+      <button role="tab" aria-selected="false" data-tab="cancelled">Cancelled and no-show (2)</button>
+    </div>
+
+    <div class="panel">
+      <table>
+        <thead>
+          <tr><th>Date</th><th>Time</th><th>Visit type</th><th>Provider</th><th>Office</th><th>Length</th><th>Status</th></tr>
+        </thead>
+        <tbody id="upcoming">
+          <tr data-appt="Nov 12 hygiene visit"><td>Thu 11/12/2026</td><td>9:30 AM</td><td>Adult cleaning and exam</td><td>Hygienist M. Chen</td><td>Northgate</td><td>60 min</td><td><span class="status s-unc">Unconfirmed</span></td></tr>
+          <tr data-appt="Dec 3 crown seat"><td>Thu 12/03/2026</td><td>2:00 PM</td><td>Crown seat, #30</td><td>Dr. Lena Ortiz</td><td>Northgate</td><td>45 min</td><td><span class="status s-conf">Confirmed</span></td></tr>
+        </tbody>
+        <tbody id="past" hidden>
+          <tr data-appt="Oct 15 crown prep"><td>Thu 10/15/2026</td><td>1:00 PM</td><td>Crown prep, #30</td><td>Dr. Lena Ortiz</td><td>Northgate</td><td>90 min</td><td><span class="status s-done">Completed</span></td></tr>
+          <tr data-appt="Sep 22 limited exam"><td>Tue 09/22/2026</td><td>11:15 AM</td><td>Limited exam, tooth pain</td><td>Dr. Sam Patel</td><td>Riverside</td><td>30 min</td><td><span class="status s-done">Completed</span></td></tr>
+          <tr data-appt="May 7 hygiene visit"><td>Thu 05/07/2026</td><td>9:30 AM</td><td>Adult cleaning and exam</td><td>Hygienist M. Chen</td><td>Northgate</td><td>60 min</td><td><span class="status s-done">Completed</span></td></tr>
+          <tr data-appt="Nov 13 2025 hygiene visit"><td>Thu 11/13/2025</td><td>10:00 AM</td><td>Adult cleaning, exam, x-rays</td><td>Hygienist M. Chen</td><td>Northgate</td><td>75 min</td><td><span class="status s-done">Completed</span></td></tr>
+          <tr data-appt="Jun 2 2025 filling"><td>Mon 06/02/2025</td><td>3:30 PM</td><td>Filling, #14</td><td>Dr. Lena Ortiz</td><td>Northgate</td><td>45 min</td><td><span class="status s-done">Completed</span></td></tr>
+        </tbody>
+        <tbody id="cancelled" hidden>
+          <tr data-appt="Apr 23 hygiene visit"><td>Thu 04/23/2026</td><td>9:30 AM</td><td>Adult cleaning and exam</td><td>Hygienist M. Chen</td><td>Northgate</td><td>60 min</td><td><span class="status s-done">Cancelled by patient</span></td></tr>
+          <tr data-appt="Jan 8 consult"><td>Thu 01/08/2026</td><td>4:00 PM</td><td>Whitening consult</td><td>Dr. Lena Ortiz</td><td>Northgate</td><td>30 min</td><td><span class="status s-ns">No-show</span></td></tr>
+        </tbody>
+      </table>
+      <p class="note" id="selnote">Select an appointment to reschedule, cancel, confirm, or send a reminder.</p>
+    </div>
+  </main>
+
+  <aside aria-label="Recall and account">
+    <div class="box">
+      <h3>Recall and due care</h3>
+      <div class="in">
+        <ul class="plain">
+          <li><span>6-month hygiene</span><span class="due">Due 11/07/2026</span></li>
+          <li><span>Bitewing x-rays</span><span class="due">Due 11/13/2026</span></li>
+          <li><span>Crown seat, #30</span><span>Scheduled</span></li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="box">
+      <h3>Account</h3>
+      <div class="in kv">
+        <span>Patient balance</span><b>$85.00</b>
+        <span>Plan</span><span style="color:var(--ink)">Sample Dental PPO</span>
+        <span>Eligibility</span><span style="color:var(--ink)">Checked 11/02/2026</span>
+        <span>Annual max left</span><span style="color:var(--ink)">$1,140.00</span>
+      </div>
+    </div>
+  </aside>
+</div>
+
+<footer>Mockup for internal demonstration only. Fictitious data. Not connected to any clinical system and not affiliated with any EHR vendor.</footer>
+
+<div class="toast" id="toast" role="status"></div>
+
+<script>
+  // Toast helper for demo-only actions
+  const toast = document.getElementById('toast');
+  let t;
+  function say(msg){ toast.textContent = msg; toast.classList.add('show'); clearTimeout(t); t = setTimeout(() => toast.classList.remove('show'), 2200); }
+
+  // Tabs
+  document.querySelectorAll('[data-tab]').forEach(btn => btn.onclick = () => {
+    document.querySelectorAll('[data-tab]').forEach(b => b.setAttribute('aria-selected', b === btn));
+    ['upcoming','past','cancelled'].forEach(id => document.getElementById(id).hidden = id !== btn.dataset.tab);
+    clearSel();
+  });
+
+  // Row selection drives the selection-dependent toolbar actions
+  let selected = null;
+  const note = document.getElementById('selnote');
+  function clearSel(){ document.querySelectorAll('tr.selected').forEach(r => r.classList.remove('selected')); selected = null;
+    note.textContent = 'Select an appointment to reschedule, cancel, confirm, or send a reminder.'; }
+  document.querySelectorAll('tr[data-appt]').forEach(row => row.onclick = () => {
+    clearSel(); row.classList.add('selected'); selected = row.dataset.appt; note.textContent = 'Selected: ' + selected;
+  });
+  document.querySelectorAll('[data-sel]').forEach(b => b.onclick = () =>
+    say(selected ? b.dataset.sel + ': ' + selected + ' (demo)' : 'Select an appointment first'));
+
+  // Everything else is a placeholder
+  document.querySelectorAll('[data-demo]').forEach(b => b.onclick = () => say(b.dataset.demo || 'Not available in demo'));
+
+</script>
+</body>
+</html>
